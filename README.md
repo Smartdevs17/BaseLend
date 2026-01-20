@@ -1,32 +1,14 @@
-# BaseLend DeFi Platform
+# BaseLend - DeFi Lending Platform
 
-Decentralized lending and borrowing platform built on Base Ethereum.
+Decentralized lending and borrowing platform on Base network with dynamic interest rates and collateral management.
 
-## Features
+## 📊 Project Statistics
 
-- 💰 **Deposit & Earn**: Deposit ERC20 tokens and earn interest
-- 🏦 **Borrow with Collateral**: Borrow against your crypto assets
-- 📊 **Dynamic Interest Rates**: Market-driven interest rate model
-- 🔒 **Secure Collateral**: 150% collateralization ratio
-- ⚡ **Base Network**: Fast and low-cost transactions
+- **Commits**: 5+
+- **Contracts**: 4
+- **Network**: Base (Mainnet & Sepolia)
 
-## Contracts
-
-### LendingPool.sol
-Main lending pool contract handling deposits, withdrawals, and loans.
-
-**Key Functions:**
-- `deposit(token, amount)` - Deposit tokens to earn interest
-- `withdraw(token, amount)` - Withdraw deposited tokens
-- `borrow(token, amount, collateralToken, collateralAmount, duration)` - Borrow with collateral
-- `repay(loanId, token)` - Repay loan and retrieve collateral
-
-## Network
-
-- **Base Sepolia** (Testnet): Chain ID 84532
-- **Base Mainnet**: Chain ID 8453
-
-## Setup
+## 🚀 Quick Start
 
 ```bash
 npm install
@@ -34,28 +16,41 @@ npx hardhat compile
 npx hardhat test
 ```
 
-## Deployment
+## 📝 Contracts
+
+1. **LendingPool** - Core lending/borrowing logic
+2. **CollateralManager** - Manage collateral positions
+3. **InterestRateModel** - Utilization-based rates
+4. **PriceOracle** - Asset price feeds
+
+## ✨ Features
+
+- 💰 Deposit & earn interest
+- 🏦 Borrow with collateral
+- 📊 Dynamic interest rates
+- 🔒 150% collateralization
+- ⚡ Base network (low fees)
+
+## 🧪 Testing
 
 ```bash
-# Deploy to Base Sepolia
+npm test
+```
+
+## 🌐 Deployment
+
+```bash
+# Base Sepolia
 npx hardhat run scripts/deploy.js --network baseSepolia
 
-# Deploy to Base Mainnet
+# Base Mainnet
 npx hardhat run scripts/deploy.js --network base
 ```
 
-## Configuration
+## 🔐 Security
 
-Copy `.env.example` to `.env` and configure:
-- `PRIVATE_KEY` - Your wallet private key
-- `BASE_MAINNET_RPC_URL` - Base mainnet RPC
-- `BASE_SEPOLIA_RPC_URL` - Base Sepolia RPC
-- `BASESCAN_API_KEY` - For contract verification
+⚠️ Not audited - use at own risk
 
-## Security
-
-⚠️ **This contract has not been audited. Use at your own risk.**
-
-## License
+## 📄 License
 
 MIT
