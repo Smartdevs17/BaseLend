@@ -23,4 +23,8 @@ library ReserveConfiguration {
     function getActive(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
         return (self.data >> 56) & 1 != 0;
     }
+
+    function getFrozen(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
+        return (self.data >> 57) & 1 != 0;
+    }
 }
