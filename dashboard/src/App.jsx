@@ -18,6 +18,7 @@ import {
 import { Web3Provider, useWeb3 } from "./context/Web3Context";
 import ProtocolStats from "./components/ProtocolStats";
 import MarketCard from "./components/MarketCard";
+import UserPositions from "./components/UserPositions";
 
 const DashboardShell = () => {
   const { account, connectWallet } = useWeb3();
@@ -28,6 +29,17 @@ const DashboardShell = () => {
     { asset: "USD Base Coin", symbol: "USDC", supplyApy: "5.82", borrowApy: "7.45", liquidity: "$85.2M", logo: "$" },
     { asset: "Wrapped Bitcoin", symbol: "WBTC", supplyApy: "1.25", borrowApy: "2.84", liquidity: "$15.8M", logo: "₿" },
   ];
+
+  // Mock data for positions
+  const userPositions = account ? {
+    supplies: [
+      { asset: "Ethereum", symbol: "ETH", amount: "12.4", apy: "3.24" },
+      { asset: "USD Base Coin", symbol: "USDC", amount: "5,200", apy: "5.82" },
+    ],
+    borrows: [
+      { asset: "Wrapped Bitcoin", symbol: "WBTC", amount: "0.05", apy: "2.84" },
+    ]
+  } : { supplies: [], borrows: [] };
 
   return (
     <div className="flex min-h-screen">
@@ -123,37 +135,43 @@ const DashboardShell = () => {
               <ShieldCheck className="text-emerald-500" size={20} /> Your Positions
             </h3>
 
-            <div className="glass-panel p-8 bg-gradient-to-br from-slate-900/50 to-blue-900/10 border-blue-500/20 relative overflow-hidden">
-              <div className="relative z-10">
-                <p className="text-xs font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Account Health</p>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-4xl font-black">---</span>
-                  <span className="text-slate-500 font-bold uppercase text-xs">Factor</span>
+            {account ? (
+              <UserPositions {...userPositions} />
+            ) : (
+              <div className="glass-panel p-8 bg-gradient-to-br from-slate-900/50 to-blue-900/10 border-blue-500/20 relative overflow-hidden">
+                <div className="relative z-10">
+                  <p className="text-xs font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Account Health</p>
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="text-4xl font-black">---</span>
+                    <span className="text-slate-500 font-bold uppercase text-xs">Factor</span>
+                  </div>
+                  <p className="text-xs text-slate-500 max-w-[200px]">Connect your wallet to see your supply and borrow positions.</p>
+                  <button
+                    onClick={connectWallet}
+                    className="mt-6 w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all capitalize"
+                  >
+                    Analyze Portfolio
+                  </button>
                 </div>
-                <p className="text-xs text-slate-500 max-w-[200px]">Connect your wallet to see your supply and borrow positions.</p>
-                <button
-                  onClick={connectWallet}
-                  className="mt-6 w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all capitalize"
-                >
-                  Analyze Portfolio
-                </button>
+                <div className="absolute top-[-20%] right-[-20%] w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
               </div>
-              <div className="absolute top-[-20%] right-[-20%] w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-            </div>
+            )}
 
             <div className="glass-panel p-6 border-slate-800">
               <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Risk Monitor</h4>
               <div className="space-y-4">
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-400">Total Borrow Limit</span>
-                  <span className="text-white font-bold">$0.00</span>
+                  <span className="text-white font-bold">{account ? "$12,400" : "$0.00"}</span>
                 </div>
                 <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-slate-700" style={{ width: '0%' }}></div>
+                  <div className="h-full bg-blue-500" style={{ width: account ? '42%' : '0%' }}></div>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-slate-800">
                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Liquidation Risk</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase">None</span>
+                  <span className={`px-2 py-0.5 rounded ${account ? 'bg-blue-500/10 text-blue-400' : 'bg-emerald-500/10 text-emerald-400'} text-[10px] font-black uppercase`}>
+                    {account ? 'Moderate' : 'None'}
+                  </span>
                 </div>
               </div>
             </div>
