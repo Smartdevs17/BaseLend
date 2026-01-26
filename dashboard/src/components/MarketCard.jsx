@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { ArrowUpRight, ArrowDownLeft, Info } from "lucide-react";
 import SupplyModal from "./SupplyModal";
+import BorrowModal from "./BorrowModal";
 
 const MarketCard = (props) => {
     const { asset, symbol, supplyApy, borrowApy, liquidity, logo } = props;
     const [isSupplyModalOpen, setIsSupplyModalOpen] = useState(false);
+    const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
 
     return (
         <>
@@ -47,7 +49,10 @@ const MarketCard = (props) => {
                     >
                         <ArrowUpRight size={16} /> Supply
                     </button>
-                    <button className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                    <button
+                        onClick={() => setIsBorrowModalOpen(true)}
+                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                    >
                         <ArrowDownLeft size={16} /> Borrow
                     </button>
                 </div>
@@ -56,6 +61,12 @@ const MarketCard = (props) => {
             <SupplyModal
                 isOpen={isSupplyModalOpen}
                 onClose={() => setIsSupplyModalOpen(false)}
+                {...props}
+            />
+
+            <BorrowModal
+                isOpen={isBorrowModalOpen}
+                onClose={() => setIsBorrowModalOpen(false)}
                 {...props}
             />
         </>
