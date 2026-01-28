@@ -37,5 +37,15 @@ describe("LendingPool", function () {
       const deposit = await lendingPool.deposits(user1.address, await tokenA.getAddress());
       expect(deposit.amount).to.equal(amount);
     });
+
+    it("Should revert when depositing unsupported token", async function () {
+      const { lendingPool, user1 } = await loadFixture(deployFixture);
+      const MockERC20 = await ethers.getContractFactory("MockERC20");
+      const unsupportedToken = await MockERC20.deploy("Unsupported", "UNS");
+      
+      await expect(
+        lendingPool.connect(user1).deposit(await unsupportedToken.getAddress(), 100)
+      ).to.be.revertedWith("Token not supported");
+    });
   });
 });
