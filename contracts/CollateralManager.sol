@@ -58,6 +58,12 @@ contract CollateralManager is Ownable {
         _positionIdCounter = 1;
     }
     
+    /**
+     * @notice Authorizes a token to be used as collateral
+     * @dev Ratio defines how much can be borrowed (e.g., 15000 = 150% collateralized)
+     * @param _token Address of the ERC20 asset
+     * @param _ratio Required collateralization ratio in basis points
+     */
     function addSupportedCollateral(address _token, uint256 _ratio) external onlyOwner {
         require(_token != address(0), "Invalid token");
         require(_ratio >= 10000, "Ratio must be >= 100%");
@@ -66,6 +72,13 @@ contract CollateralManager is Ownable {
         collateralRatios[_token] = _ratio;
     }
     
+    /**
+     * @notice Locks tokens into the protocol to enable borrowing
+     * @dev Moves funds from msg.sender to the contract. Requires prior approval.
+     * @param _token Asset to deposit
+     * @param _amount Quantity in WEI
+     * @return The unique position ID
+     */
     function depositCollateral(address _token, uint256 _amount) external returns (uint256) {
         require(supportedCollateral[_token], "Token not supported");
         require(_amount > 0, "Amount must be > 0");
@@ -87,6 +100,12 @@ contract CollateralManager is Ownable {
         return positionId;
     }
     
+    /**
+     * @notice Releases collateral back to the borrower
+     * @dev Reverts if the borrower tries to withdraw more than their current position
+     * @param _positionId The ID of the position
+     * @param _amount Quantity to release in WEI
+     */
     function withdrawCollateral(uint256 _positionId, uint256 _amount) external {
         CollateralPosition storage position = positions[_positionId];
         require(position.borrower == msg.sender, "Not borrower");
@@ -104,6 +123,11 @@ contract CollateralManager is Ownable {
         emit CollateralWithdrawn(_positionId, _amount);
     }
     
+    /**
+     * @notice Forced closure of a position due to default
+     * @dev Only the owner/governance can trigger liquidation in this basic model
+     * @param _positionId The ID of the position to seize
+     */
     function liquidatePosition(uint256 _positionId) external onlyOwner {
         CollateralPosition storage position = positions[_positionId];
         require(position.isActive, "Position not active");
@@ -117,6 +141,11 @@ contract CollateralManager is Ownable {
         emit CollateralLiquidated(_positionId, amount);
     }
     
+    /**
+     * @notice View function to calculate borrowing capacity for a position
+     * @param _positionId The ID of the position
+     * @return Max borrowable amount in asset units
+     */
     function getMaxBorrow(uint256 _positionId) external view returns (uint256) {
         CollateralPosition memory position = positions[_positionId];
         uint256 ratio = collateralRatios[position.collateralToken];
