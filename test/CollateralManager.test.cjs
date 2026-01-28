@@ -33,4 +33,33 @@ describe("CollateralManager", function () {
       ).to.be.revertedWith("Ratio must be >= 100%");
     });
   });
+
+  describe("Deposit", function () {
+    it("Should deposit collateral successfully", async function () {
+      const { manager, token, user1 } = await loadFixture(deployFixture);
+      
+      await manager.addSupportedCollateral(await token.getAddress(), 15000);
+      
+      const amount = ethers.parseEther("100");
+      await token.mint(user1.address, amount);
+      await token.connect(user1).approve(await manager.getAddress(), amount);
+      
+      await expect(manager.connect(user1).depositCollateral(await token.getAddress(), amount))
+        .to.emit(manager, "CollateralDeposited")
+        .withArgs(1, user1.address, amount);
+        
+      const position = await manager.positions(1);
+      expect(position.borrower).to.equal(user1.address);
+      expect(position.amount).to.equal(amount);
+      expect(position.isActive).to.equal(true);
+    });
+
+    it("Should revert on unsupported token", async function () {
+      const { manager, token, user1 } = await loadFixture(deployFixture);
+      
+      await expect(
+        manager.connect(user1).depositCollateral(await token.getAddress(), 100)
+      ).to.be.revertedWith("Token not supported");
+    });
+  });
 });
