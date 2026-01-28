@@ -47,5 +47,15 @@ describe("PriceOracle", function () {
       
       await expect(oracle.getPrice(await token.getAddress())).to.be.revertedWith("Price too old");
     });
+
+    it("Should revert when setting price to zero", async function () {
+      const { oracle, owner } = await loadFixture(deployFixture);
+      const MockERC20 = await ethers.getContractFactory("MockERC20");
+      const token = await MockERC20.deploy("Token", "TKN");
+      
+      await expect(
+        oracle.connect(owner).updatePrice(await token.getAddress(), 0)
+      ).to.be.revertedWith("Invalid price");
+    });
   });
 });
