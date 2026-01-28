@@ -23,13 +23,19 @@ describe("LendingPool", function () {
   }
   
   describe("Deposit", function () {
-    it("Should accept deposits", async function () {
-      const { lendingPool, user1 } = await loadFixture(deployFixture);
+    it("Should deposit tokens successfully", async function () {
+      const { lendingPool, tokenA, user1 } = await loadFixture(deployFixture);
       
-      // In a real test we'd mock an ERC20, but checking basic functionality here
-      // Assuming LendingPool has a deposit function (it was created in previous turns)
-      // If it doesn't have checks implemented yet, this confirms deployment at least.
-      expect(await lendingPool.getAddress()).to.be.properAddress;
+      const amount = ethers.parseEther("100");
+      await tokenA.mint(user1.address, amount);
+      await tokenA.connect(user1).approve(await lendingPool.getAddress(), amount);
+      
+      await expect(lendingPool.connect(user1).deposit(await tokenA.getAddress(), amount))
+        .to.emit(lendingPool, "Deposited")
+        .withArgs(user1.address, await tokenA.getAddress(), amount);
+      
+      const deposit = await lendingPool.deposits(user1.address, await tokenA.getAddress());
+      expect(deposit.amount).to.equal(amount);
     });
   });
 });
