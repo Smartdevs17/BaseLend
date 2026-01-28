@@ -57,5 +57,22 @@ describe("PriceOracle", function () {
         oracle.connect(owner).updatePrice(await token.getAddress(), 0)
       ).to.be.revertedWith("Invalid price");
     });
+
+    it("Should update multiple prices", async function () {
+      const { oracle, owner } = await loadFixture(deployFixture);
+      const MockERC20 = await ethers.getContractFactory("MockERC20");
+      const tokenA = await MockERC20.deploy("TokenA", "TKNA");
+      const tokenB = await MockERC20.deploy("TokenB", "TKNB");
+      
+      const prices = [ethers.parseUnits("1000", 8), ethers.parseUnits("2000", 8)];
+      
+      await expect(oracle.connect(owner).updatePrices(
+        [await tokenA.getAddress(), await tokenB.getAddress()],
+        prices
+      )).to.emit(oracle, "PriceUpdated");
+      
+      expect(await oracle.getPriceUnsafe(await tokenA.getAddress())).to.equal(prices[0]);
+      expect(await oracle.getPriceUnsafe(await tokenB.getAddress())).to.equal(prices[1]);
+    });
   });
 });
