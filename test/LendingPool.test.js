@@ -47,5 +47,13 @@ describe("LendingPool", function () {
         lendingPool.connect(user1).deposit(await unsupportedToken.getAddress(), 100)
       ).to.be.revertedWith("Token not supported");
     });
+
+    it("Should revert when depositing zero amount", async function () {
+      const { lendingPool, tokenA, user1 } = await loadFixture(deployFixture);
+      
+      await expect(
+        lendingPool.connect(user1).deposit(await tokenA.getAddress(), 0)
+      ).to.be.revertedWith("Amount must be > 0");
+    });
   });
 });
