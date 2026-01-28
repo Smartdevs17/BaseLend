@@ -11,12 +11,28 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  */
 contract FlashLoan is ReentrancyGuard, Ownable {
     
+    /// @notice The fee charged for each flash loan in basis points (e.g., 9 = 0.09%)
     uint256 public constant FLASH_LOAN_FEE = 9; // 0.09% fee
     
+    /**
+     * @notice Emitted when a flash loan is successfully executed and repaid
+     * @param target The address of the receiver that performed the operation
+     * @param asset The address of the token borrowed
+     * @param amount The principal amount borrowed
+     * @param fee The fee amount paid on top of principal
+     */
     event FlashLoanExecuted(address indexed target, address indexed asset, uint256 amount, uint256 fee);
     
     constructor() Ownable(msg.sender) {}
     
+    /**
+     * @notice Initiates a flash loan
+     * @dev Funds are transferred, a callback is executed, and repayment is verified in one transaction
+     * @param _receiver The address that will receive the funds and perform logic
+     * @param _asset The ERC20 token to borrow
+     * @param _amount The quantity in WEI to borrow
+     * @param _params Encoded data to pass to the receiver's callback
+     */
     function executeFlashLoan(
         address _receiver,
         address _asset,
@@ -45,6 +61,11 @@ contract FlashLoan is ReentrancyGuard, Ownable {
         emit FlashLoanExecuted(_receiver, _asset, _amount, fee);
     }
     
+    /**
+     * @notice Allows the protocol owner to collect accumulated fees
+     * @dev Transfers the entire token balance of the contract to the owner
+     * @param _asset The address of the token to withdraw
+     */
     function withdrawFees(address _asset) external onlyOwner {
         IERC20 token = IERC20(_asset);
         uint256 balance = token.balanceOf(address(this));
