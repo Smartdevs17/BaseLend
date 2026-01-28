@@ -9,12 +9,22 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract PriceOracle is Ownable {
     
-    mapping(address => uint256) public prices; // Price in USD with 8 decimals
+    /// @notice Maps a token address to its current price (8 decimals)
+    mapping(address => uint256) public prices;
+    
+    /// @notice Maps a token address to its last update timestamp
     mapping(address => uint256) public lastUpdated;
     
+    /// @notice Number of decimals used for price data
     uint256 public constant PRICE_DECIMALS = 8;
+    
+    /// @notice Maximum allowed age of a price update before it's considered stale
     uint256 public maxPriceAge = 1 hours;
     
+    /// @notice Emitted when a token price is updated
+    /// @param token Address of the asset
+    /// @param price New price in USD (8 decimals)
+    /// @param timestamp Time of the update
     event PriceUpdated(address indexed token, uint256 price, uint256 timestamp);
     
     constructor() Ownable(msg.sender) {}
