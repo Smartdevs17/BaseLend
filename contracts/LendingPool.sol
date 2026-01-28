@@ -13,12 +13,30 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 contract LendingPool is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     
+    /**
+     * @notice Stores information about a user's deposit
+     * @param amount The amount deposited
+     * @param depositTime The timestamp of the last deposit
+     * @param interestEarned Total interest earned by the user (accrued)
+     */
     struct UserDeposit {
         uint256 amount;
         uint256 depositTime;
         uint256 interestEarned;
     }
     
+    /**
+     * @notice Stores information about a loan
+     * @param borrower Address of the user receiving the loan
+     * @param amount Amount of tokens borrowed
+     * @param collateralAmount Amount of tokens provided as collateral
+     * @param collateralToken Address of the token used as collateral
+     * @param interestRate Interest rate applied to this loan
+     * @param startTime Timestamp when the loan was created
+     * @param duration Duration of the loan in seconds
+     * @param isActive True if the loan is currently active
+     * @param isRepaid True if the loan has been fully repaid
+     */
     struct Loan {
         address borrower;
         uint256 amount;
