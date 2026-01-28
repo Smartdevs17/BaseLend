@@ -33,4 +33,29 @@ describe("InterestRateModel", function () {
       expect(await model.multiplier()).to.equal(800);
     });
   });
+
+  describe("Borrow Rate", function () {
+    it("Should calculate correct rate at 0% utilization", async function () {
+      const { model } = await loadFixture(deployFixture);
+      // Base rate = 2% (200 bps)
+      expect(await model.getBorrowRate(0)).to.equal(200);
+    });
+
+    it("Should calculate correct rate at 50% utilization", async function () {
+      const { model } = await loadFixture(deployFixture);
+      // Below kink (80%). Rate = Base + (Util * Multiplier)
+      // 200 + (5000 * 1000 / 10000) = 200 + 500 = 700 (7%)
+      expect(await model.getBorrowRate(5000)).to.equal(700);
+    });
+
+    it("Should calculate correct rate at 100% utilization", async function () {
+      const { model } = await loadFixture(deployFixture);
+      // Above kink (80%). Rate = Normal + (Excess * Jump)
+      // Normal = 200 + (8000 * 1000 / 10000) = 1000 (10%)
+      // Excess = 10000 - 8000 = 2000
+      // Jump = 2000 * 5000 / 10000 = 1000 (10%)
+      // Total = 1000 + 1000 = 2000 (20%)
+      expect(await model.getBorrowRate(10000)).to.equal(2000);
+    });
+  });
 });
