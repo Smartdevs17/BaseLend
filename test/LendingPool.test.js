@@ -1,15 +1,25 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers.js";
+const { expect } = require("chai");
+const hre = require("hardhat");
+const { ethers } = hre;
+const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 
 describe("LendingPool", function () {
   async function deployFixture() {
     const [owner, user1, user2] = await ethers.getSigners();
     
+    // Deploy Mock Tokens
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    const tokenA = await MockERC20.deploy("Token A", "TKNA");
+    const tokenB = await MockERC20.deploy("Token B", "TKNB");
+
     const LendingPool = await ethers.getContractFactory("LendingPool");
     const lendingPool = await LendingPool.deploy();
     
-    return { lendingPool, owner, user1, user2 };
+    // Whitelist tokens
+    await lendingPool.addSupportedToken(await tokenA.getAddress());
+    await lendingPool.addSupportedToken(await tokenB.getAddress());
+
+    return { lendingPool, tokenA, tokenB, owner, user1, user2 };
   }
   
   describe("Deposit", function () {
