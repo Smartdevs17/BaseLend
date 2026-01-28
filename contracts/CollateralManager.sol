@@ -38,8 +38,20 @@ contract CollateralManager is Ownable {
     /// @dev Internal counter for assigning unique position IDs
     uint256 private _positionIdCounter;
     
+    /// @notice Emitted when a borrower locks collateral
+    /// @param positionId The unique ID assigned to the deposit
+    /// @param borrower The account that owns the collateral
+    /// @param amount The quantity of tokens deposited
     event CollateralDeposited(uint256 indexed positionId, address indexed borrower, uint256 amount);
+    
+    /// @notice Emitted when collateral is returned to the borrower
+    /// @param positionId The ID of the collateral position
+    /// @param amount The quantity of tokens withdrawn
     event CollateralWithdrawn(uint256 indexed positionId, uint256 amount);
+    
+    /// @notice Emitted when a position is liquidated by the owner/protocol
+    /// @param positionId The ID of the liquidated position
+    /// @param amount The quantity of tokens seized
     event CollateralLiquidated(uint256 indexed positionId, uint256 amount);
     
     constructor() Ownable(msg.sender) {
