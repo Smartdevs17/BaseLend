@@ -58,4 +58,18 @@ describe("InterestRateModel", function () {
       expect(await model.getBorrowRate(10000)).to.equal(2000);
     });
   });
+
+  describe("Supply Rate", function () {
+    it("Should calculate correct supply rate", async function () {
+      const { model } = await loadFixture(deployFixture);
+      
+      // Utilization 50% (5000 bps)
+      // Borrow Rate = 7% (700 bps)
+      // Reserve Factor = 10% (1000 bps)
+      // RateToPool = 700 * (1 - 0.10) = 630
+      // Supply Rate = 5000 * 630 / 10000 = 315 (3.15%)
+      
+      expect(await model.getSupplyRate(5000, 1000)).to.equal(315);
+    });
+  });
 });
