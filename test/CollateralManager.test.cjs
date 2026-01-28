@@ -62,4 +62,38 @@ describe("CollateralManager", function () {
       ).to.be.revertedWith("Token not supported");
     });
   });
+
+  describe("Withdraw", function () {
+    it("Should withdraw collateral successfully", async function () {
+      const { manager, token, user1 } = await loadFixture(deployFixture);
+      
+      await manager.addSupportedCollateral(await token.getAddress(), 15000);
+      const amount = ethers.parseEther("100");
+      await token.mint(user1.address, amount);
+      await token.connect(user1).approve(await manager.getAddress(), amount);
+      await manager.connect(user1).depositCollateral(await token.getAddress(), amount);
+      
+      await expect(manager.connect(user1).withdrawCollateral(1, amount))
+        .to.emit(manager, "CollateralWithdrawn")
+        .withArgs(1, amount);
+        
+      const position = await manager.positions(1);
+      expect(position.amount).to.equal(0);
+      expect(position.isActive).to.equal(false);
+    });
+
+    it("Should revert if not borrower", async function () {
+      const { manager, token, user1, user2 } = await loadFixture(deployFixture);
+      
+      await manager.addSupportedCollateral(await token.getAddress(), 15000);
+      const amount = ethers.parseEther("100");
+      await token.mint(user1.address, amount);
+      await token.connect(user1).approve(await manager.getAddress(), amount);
+      await manager.connect(user1).depositCollateral(await token.getAddress(), amount);
+      
+      await expect(
+        manager.connect(user2).withdrawCollateral(1, amount)
+      ).to.be.revertedWith("Not borrower");
+    });
+  });
 });
