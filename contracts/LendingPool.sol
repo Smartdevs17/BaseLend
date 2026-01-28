@@ -67,10 +67,31 @@ contract LendingPool is Ownable, ReentrancyGuard {
     /// @notice The required collateral ratio in basis points (e.g. 15000 = 150%)
     uint256 public collateralRatio = 15000;
     
+    /// @notice Emitted when a user deposits tokens
+    /// @param user Address of the depositor
+    /// @param token Address of the token deposited
+    /// @param amount Amount of tokens deposited
     event Deposited(address indexed user, address indexed token, uint256 amount);
+    
+    /// @notice Emitted when a user withdraws tokens
+    /// @param user Address of the withdrawer
+    /// @param token Address of the token withdrawn
+    /// @param amount Amount of tokens withdrawn
     event Withdrawn(address indexed user, address indexed token, uint256 amount);
+    
+    /// @notice Emitted when a new loan is created
+    /// @param loanId Unique ID of the created loan
+    /// @param borrower Address of the borrower
+    /// @param amount Amount of tokens borrowed
     event LoanCreated(uint256 indexed loanId, address indexed borrower, uint256 amount);
+    
+    /// @notice Emitted when a loan is fully repaid
+    /// @param loanId Unique ID of the repaid loan
+    /// @param borrower Address of the borrower
     event LoanRepaid(uint256 indexed loanId, address indexed borrower);
+    
+    /// @notice Emitted when a new token is added to the supported tokens list
+    /// @param token Address of the supported token
     event TokenSupported(address indexed token);
     
     constructor() Ownable(msg.sender) {
