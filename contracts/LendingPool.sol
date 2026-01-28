@@ -142,6 +142,16 @@ contract LendingPool is Ownable, ReentrancyGuard {
         emit Withdrawn(msg.sender, _token, _amount);
     }
     
+    /**
+     * @notice Allows a user to borrow tokens from the pool by providing collateral.
+     * @dev Requires the borrow and collateral tokens to be supported, and collateral amount must meet the minimum ratio.
+     * @param _token Address of the token to borrow.
+     * @param _amount Amount of tokens to borrow.
+     * @param _collateralToken Address of the token to provide as collateral.
+     * @param _collateralAmount Amount of collateral tokens to be transferred.
+     * @param _duration Duration of the loan in seconds.
+     * @return loanId The unique ID of the created loan.
+     */
     function borrow(
         address _token,
         uint256 _amount,
@@ -177,6 +187,12 @@ contract LendingPool is Ownable, ReentrancyGuard {
         return loanId;
     }
     
+    /**
+     * @notice Repays an active loan and releases the collateral.
+     * @dev Calculates interest accrued and requires the user to transfer the total repayment amount.
+     * @param _loanId ID of the loan to repay.
+     * @param _token Address of the token being repaid (should match the borrowed token).
+     */
     function repay(uint256 _loanId, address _token) external nonReentrant {
         Loan storage loan = loans[_loanId];
         require(loan.isActive, "Loan not active");
@@ -195,16 +211,31 @@ contract LendingPool is Ownable, ReentrancyGuard {
         emit LoanRepaid(_loanId, msg.sender);
     }
     
+    /**
+     * @notice Calculates the interest accrued on a loan based on time elapsed and interest rate.
+     * @param _loanId ID of the loan.
+     * @return The amount of interest accrued in tokens.
+     */
     function calculateInterest(uint256 _loanId) public view returns (uint256) {
         Loan memory loan = loans[_loanId];
         uint256 timeElapsed = block.timestamp - loan.startTime;
         return (loan.amount * loan.interestRate * timeElapsed) / (10000 * 365 days);
     }
     
+    /**
+     * @notice Sets a new base interest rate for new loans.
+     * @dev Only the contract owner can call this function.
+     * @param _rate The new base interest rate in basis points.
+     */
     function setBaseInterestRate(uint256 _rate) external onlyOwner {
         baseInterestRate = _rate;
     }
     
+    /**
+     * @notice Sets a new default collateral ratio.
+     * @dev Only the contract owner can call this function.
+     * @param _ratio The new collateral ratio in basis points.
+     */
     function setCollateralRatio(uint256 _ratio) external onlyOwner {
         collateralRatio = _ratio;
     }
