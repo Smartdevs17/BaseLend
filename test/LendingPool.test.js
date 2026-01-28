@@ -56,4 +56,23 @@ describe("LendingPool", function () {
       ).to.be.revertedWith("Amount must be > 0");
     });
   });
+
+  describe("Withdraw", function () {
+    it("Should withdraw tokens successfully", async function () {
+      const { lendingPool, tokenA, user1 } = await loadFixture(deployFixture);
+      
+      const amount = ethers.parseEther("100");
+      await tokenA.mint(user1.address, amount);
+      await tokenA.connect(user1).approve(await lendingPool.getAddress(), amount);
+      await lendingPool.connect(user1).deposit(await tokenA.getAddress(), amount);
+      
+      const withdrawAmount = ethers.parseEther("50");
+      await expect(lendingPool.connect(user1).withdraw(await tokenA.getAddress(), withdrawAmount))
+        .to.emit(lendingPool, "Withdrawn")
+        .withArgs(user1.address, await tokenA.getAddress(), withdrawAmount);
+        
+      const deposit = await lendingPool.deposits(user1.address, await tokenA.getAddress());
+      expect(deposit.amount).to.equal(amount - withdrawAmount);
+    });
+  });
 });
