@@ -10,6 +10,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract CollateralManager is Ownable {
     
+    /**
+     * @notice Represents a borrower's collateral position
+     * @param borrower The address that deposited the collateral
+     * @param collateralToken The ERC20 token used as collateral
+     * @param amount The quantity of tokens locked
+     * @param lockedAt The timestamp when the deposit occurred
+     * @param isActive Whether the position is currently open
+     */
     struct CollateralPosition {
         address borrower;
         address collateralToken;
@@ -18,10 +26,16 @@ contract CollateralManager is Ownable {
         bool isActive;
     }
     
+    /// @notice Maps position ID to its details
     mapping(uint256 => CollateralPosition) public positions;
-    mapping(address => bool) public supportedCollateral;
-    mapping(address => uint256) public collateralRatios; // in basis points
     
+    /// @notice Tracks which tokens are accepted as collateral
+    mapping(address => bool) public supportedCollateral;
+    
+    /// @notice Minimum collateralization ratio per token (in basis points, 10000 = 100%)
+    mapping(address => uint256) public collateralRatios;
+    
+    /// @dev Internal counter for assigning unique position IDs
     uint256 private _positionIdCounter;
     
     event CollateralDeposited(uint256 indexed positionId, address indexed borrower, uint256 amount);
