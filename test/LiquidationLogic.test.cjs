@@ -4,11 +4,7 @@ const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helper
 
 describe("LiquidationLogic", function () {
   async function deployFixture() {
-    const MockLogic = await ethers.getContractFactory("MockLiquidationLogic", {
-      libraries: {
-        LiquidationLogic: (await (await ethers.getContractFactory("LiquidationLogic")).deploy()).target,
-      },
-    });
+    const MockLogic = await ethers.getContractFactory("MockLiquidationLogic");
     const mock = await MockLogic.deploy();
     return { mock };
   }
