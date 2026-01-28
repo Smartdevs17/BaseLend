@@ -9,6 +9,16 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @title FlashLoan
  * @dev Simple Flash Loan implementation for BaseLend
  */
+interface IFlashLoanReceiver {
+    function executeOperation(
+        address asset,
+        uint256 amount,
+        uint256 premium,
+        address initiator,
+        bytes calldata params
+    ) external returns (bool);
+}
+
 contract FlashLoan is ReentrancyGuard, Ownable {
     
     /// @notice The fee charged for each flash loan in basis points (e.g., 9 = 0.09%)
@@ -42,7 +52,6 @@ contract FlashLoan is ReentrancyGuard, Ownable {
         require(_amount > 0, "Amount must be > 0");
         
         uint256 fee = (_amount * FLASH_LOAN_FEE) / 10000;
-        uint256 totalDebt = _amount + fee;
         
         IERC20 token = IERC20(_asset);
         uint256 balanceBefore = token.balanceOf(address(this));
@@ -51,8 +60,8 @@ contract FlashLoan is ReentrancyGuard, Ownable {
         // Transfer funds to receiver
         token.transfer(_receiver, _amount);
         
-        // Call executeOperation on receiver (interface omitted for brevity in this step)
-        // IFlashLoanReceiver(_receiver).executeOperation(_asset, _amount, fee, msg.sender, _params);
+        // Call executeOperation on receiver
+        IFlashLoanReceiver(_receiver).executeOperation(_asset, _amount, fee, msg.sender, _params);
         
         // Validate repayment
         uint256 balanceAfter = token.balanceOf(address(this));
