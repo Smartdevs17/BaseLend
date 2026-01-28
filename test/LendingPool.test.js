@@ -121,4 +121,37 @@ describe("LendingPool", function () {
       expect(loan.isActive).to.equal(true);
     });
   });
+
+  describe("Repay", function () {
+    it("Should repay loan successfully", async function () {
+      const { lendingPool, tokenA, tokenB, user1, owner } = await loadFixture(deployFixture);
+      
+      // Setup liquidity and loan
+      const liquidityAmount = ethers.parseEther("1000");
+      await tokenB.mint(owner.address, liquidityAmount);
+      await tokenB.connect(owner).approve(await lendingPool.getAddress(), liquidityAmount);
+      await lendingPool.connect(owner).deposit(await tokenB.getAddress(), liquidityAmount);
+
+      const collateralAmount = ethers.parseEther("150");
+      const borrowAmount = ethers.parseEther("100");
+      
+      await tokenA.mint(user1.address, collateralAmount);
+      await tokenA.connect(user1).approve(await lendingPool.getAddress(), collateralAmount);
+      await lendingPool.connect(user1).borrow(await tokenB.getAddress(), borrowAmount, await tokenA.getAddress(), collateralAmount, 365 * 24 * 60 * 60);
+
+      // Repay Setup
+      // Mint extra tokens to user1 for interest payment
+      const repayAmount = ethers.parseEther("110"); 
+      await tokenB.mint(user1.address, repayAmount);
+      await tokenB.connect(user1).approve(await lendingPool.getAddress(), repayAmount);
+      
+      await expect(lendingPool.connect(user1).repay(1, await tokenB.getAddress()))
+        .to.emit(lendingPool, "LoanRepaid")
+        .withArgs(1, user1.address);
+        
+      const loan = await lendingPool.loans(1);
+      expect(loan.isRepaid).to.equal(true);
+      expect(loan.isActive).to.equal(false);
+    });
+  });
 });
