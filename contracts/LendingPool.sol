@@ -49,13 +49,23 @@ contract LendingPool is Ownable, ReentrancyGuard {
         bool isRepaid;
     }
     
+    /// @notice Maps user address and token address to UserDeposit data
     mapping(address => mapping(address => UserDeposit)) public deposits;
+    
+    /// @notice Maps loan ID to Loan data
     mapping(uint256 => Loan) public loans;
+    
+    /// @notice True if a token is supported for lending and collateral
     mapping(address => bool) public supportedTokens;
     
+    /// @notice Incremental counter for loan IDs
     uint256 public loanIdCounter;
-    uint256 public baseInterestRate = 500; // 5% in basis points
-    uint256 public collateralRatio = 15000; // 150% in basis points
+    
+    /// @notice The current base interest rate in basis points (e.g. 500 = 5%)
+    uint256 public baseInterestRate = 500;
+    
+    /// @notice The required collateral ratio in basis points (e.g. 15000 = 150%)
+    uint256 public collateralRatio = 15000;
     
     event Deposited(address indexed user, address indexed token, uint256 amount);
     event Withdrawn(address indexed user, address indexed token, uint256 amount);
