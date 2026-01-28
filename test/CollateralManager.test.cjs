@@ -116,7 +116,8 @@ describe("CollateralManager", function () {
       expect(position.isActive).to.equal(false);
       
       // Check owner received funds
-      expect(await token.balanceOf(owner.address)).to.equal(amount);
+      const initialSupply = ethers.parseUnits("1000000", 18);
+      expect(await token.balanceOf(owner.address)).to.equal(initialSupply + amount);
     });
   });
 });
