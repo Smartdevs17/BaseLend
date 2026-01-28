@@ -88,4 +88,37 @@ describe("LendingPool", function () {
       ).to.be.revertedWith("Insufficient balance");
     });
   });
+  });
+
+  describe("Borrow", function () {
+    it("Should borrow tokens successfully", async function () {
+      const { lendingPool, tokenA, tokenB, user1, owner } = await loadFixture(deployFixture);
+      
+      // Setup: Pool has liquidity
+      const liquidityAmount = ethers.parseEther("1000");
+      await tokenB.mint(owner.address, liquidityAmount);
+      await tokenB.connect(owner).approve(await lendingPool.getAddress(), liquidityAmount);
+      await lendingPool.connect(owner).deposit(await tokenB.getAddress(), liquidityAmount);
+
+      // Setup: User has collateral
+      const collateralAmount = ethers.parseEther("150"); // 150% collateral ratio
+      const borrowAmount = ethers.parseEther("100");
+      
+      await tokenA.mint(user1.address, collateralAmount);
+      await tokenA.connect(user1).approve(await lendingPool.getAddress(), collateralAmount);
+      
+      await expect(lendingPool.connect(user1).borrow(
+        await tokenB.getAddress(),
+        borrowAmount,
+        await tokenA.getAddress(),
+        collateralAmount,
+        365 * 24 * 60 * 60 // 1 year
+      )).to.emit(lendingPool, "LoanCreated");
+      
+      const loan = await lendingPool.loans(1);
+      expect(loan.borrower).to.equal(user1.address);
+      expect(loan.amount).to.equal(borrowAmount);
+      expect(loan.isActive).to.equal(true);
+    });
+  });
 });
