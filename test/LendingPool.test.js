@@ -74,5 +74,18 @@ describe("LendingPool", function () {
       const deposit = await lendingPool.deposits(user1.address, await tokenA.getAddress());
       expect(deposit.amount).to.equal(amount - withdrawAmount);
     });
+
+    it("Should revert when withdrawing more than balance", async function () {
+      const { lendingPool, tokenA, user1 } = await loadFixture(deployFixture);
+      
+      const amount = ethers.parseEther("100");
+      await tokenA.mint(user1.address, amount);
+      await tokenA.connect(user1).approve(await lendingPool.getAddress(), amount);
+      await lendingPool.connect(user1).deposit(await tokenA.getAddress(), amount);
+      
+      await expect(
+        lendingPool.connect(user1).withdraw(await tokenA.getAddress(), amount + 1n)
+      ).to.be.revertedWith("Insufficient balance");
+    });
   });
 });
