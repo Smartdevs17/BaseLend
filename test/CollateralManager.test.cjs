@@ -96,4 +96,27 @@ describe("CollateralManager", function () {
       ).to.be.revertedWith("Not borrower");
     });
   });
+
+  describe("Liquidation", function () {
+    it("Should liquidate position successfully", async function () {
+      const { manager, token, owner, user1 } = await loadFixture(deployFixture);
+      
+      await manager.addSupportedCollateral(await token.getAddress(), 15000);
+      const amount = ethers.parseEther("100");
+      await token.mint(user1.address, amount);
+      await token.connect(user1).approve(await manager.getAddress(), amount);
+      await manager.connect(user1).depositCollateral(await token.getAddress(), amount);
+      
+      await expect(manager.connect(owner).liquidatePosition(1))
+        .to.emit(manager, "CollateralLiquidated")
+        .withArgs(1, amount);
+        
+      const position = await manager.positions(1);
+      expect(position.amount).to.equal(0);
+      expect(position.isActive).to.equal(false);
+      
+      // Check owner received funds
+      expect(await token.balanceOf(owner.address)).to.equal(amount);
+    });
+  });
 });
