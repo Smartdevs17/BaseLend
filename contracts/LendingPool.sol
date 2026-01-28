@@ -98,12 +98,23 @@ contract LendingPool is Ownable, ReentrancyGuard {
         loanIdCounter = 1;
     }
     
+    /**
+     * @notice Adds a new token to the list of supported assets for lending and collateral.
+     * @dev Only the contract owner can call this function.
+     * @param _token Address of the token to be supported.
+     */
     function addSupportedToken(address _token) external onlyOwner {
         require(_token != address(0), "Invalid token");
         supportedTokens[_token] = true;
         emit TokenSupported(_token);
     }
     
+    /**
+     * @notice Deposits tokens into the lending pool.
+     * @dev Requires the token to be supported and the user to have approved the pool to spend the tokens.
+     * @param _token Address of the token to deposit.
+     * @param _amount Amount of tokens to deposit.
+     */
     function deposit(address _token, uint256 _amount) external nonReentrant {
         require(supportedTokens[_token], "Token not supported");
         require(_amount > 0, "Amount must be > 0");
@@ -116,6 +127,12 @@ contract LendingPool is Ownable, ReentrancyGuard {
         emit Deposited(msg.sender, _token, _amount);
     }
     
+    /**
+     * @notice Withdraws tokens from the lending pool.
+     * @dev Checks for sufficient balance before transferring tokens back to the user.
+     * @param _token Address of the token to withdraw.
+     * @param _amount Amount of tokens to withdraw.
+     */
     function withdraw(address _token, uint256 _amount) external nonReentrant {
         require(deposits[msg.sender][_token].amount >= _amount, "Insufficient balance");
         
